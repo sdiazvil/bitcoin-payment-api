@@ -35,7 +35,6 @@ def send_bitcoin_to_wallet(transaction: BitcoinTransaction):
 
 
 def check_bitcoin_received(transaction: BitcoinReception):
-    # También puedes verificar las transacciones
     transacciones = my_key.get_transactions()
     print("Transacciones:")
     print(transacciones)

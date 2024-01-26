@@ -16,10 +16,8 @@ def send_bitcoin(transaction: BitcoinTransaction):
         response = send_bitcoin_to_wallet(transaction)
         return response
     except HTTPException as e:
-        # Manejar la excepción HTTPException
         return {"error": f"Error: {e.status_code}, {e.detail}"}
     except Exception as e:
-        # Manejar otras excepciones
         return {"error": f"Error desconocido: {str(e)}"}
 
 @app.post("/received-bitcoin")
@@ -29,10 +27,8 @@ def received_bitcoin(transaction: BitcoinReception):
         response = check_bitcoin_received(transaction)
         return response
     except HTTPException as e:
-        # Manejar la excepción HTTPException
         return {"error": f"Error: {e.status_code}, {e.detail}"}
     except Exception as e:
-        # Manejar otras excepciones
         return {"error": f"Error desconocido: {str(e)}"}
 
 if __name__ == "__main__":
