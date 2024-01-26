@@ -43,3 +43,5 @@ def check_bitcoin_received(transaction: BitcoinReception):
         if tx == transaction.tx_hash:
             print("Transacción encontrada")
             return {f"transacción encontrada: {tx}"}
+        else:
+            return  {"Transacción no encontrada"}
