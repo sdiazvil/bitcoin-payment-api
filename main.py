@@ -1,26 +1,39 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import uvicorn
+from models import BitcoinReception, BitcoinTransaction
 
-app = FastAPI()
+from transaction import check_bitcoin_received, send_bitcoin_to_wallet
 
-class BitcoinTransaction(BaseModel):
-    sender: str
-    receiver: str
-    amount: float
-    transaction_id: str
+app = FastAPI(
+    title="Bitcoin transaction microservice",
+    version="1.0",
+    description="A simple API server to transfer btc in testnet"
+    )
 
-@app.post("/receive-bitcoin")
-async def receive_bitcoin(transaction: BitcoinTransaction):
-    # Aquí podrías implementar la lógica para manejar la transacción de Bitcoin
-    # Asegúrate de validar la autenticidad y la integridad de la transacción
+@app.post("/send-bitcoin")
+def send_bitcoin(transaction: BitcoinTransaction):
+    try:
+        response = send_bitcoin_to_wallet(transaction)
+        return response
+    except HTTPException as e:
+        # Manejar la excepción HTTPException
+        return {"error": f"Error: {e.status_code}, {e.detail}"}
+    except Exception as e:
+        # Manejar otras excepciones
+        return {"error": f"Error desconocido: {str(e)}"}
+
+@app.post("/received-bitcoin")
+def received_bitcoin(transaction: BitcoinReception):
     
-    # Ejemplo de validación simple: solo imprime la información de la transacción
-    print(f"Transacción de Bitcoin recibida: {transaction}")
-    
-    # Puedes agregar más lógica aquí, como almacenar la transacción en una base de datos, etc.
-    
-    return {"status": "Transacción de Bitcoin recibida exitosamente"}
+    try:
+        response = check_bitcoin_received(transaction)
+        return response
+    except HTTPException as e:
+        # Manejar la excepción HTTPException
+        return {"error": f"Error: {e.status_code}, {e.detail}"}
+    except Exception as e:
+        # Manejar otras excepciones
+        return {"error": f"Error desconocido: {str(e)}"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
