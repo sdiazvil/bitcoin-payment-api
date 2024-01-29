@@ -2,8 +2,9 @@
 from bit import PrivateKeyTestnet
 from fastapi import HTTPException
 
-from models import BitcoinReception, BitcoinTransaction
+from models import BitcoinReception, BitcoinTransaction, TxInput
 from dotenv import dotenv_values
+import requests
 
 config = dotenv_values(".env")
 
@@ -44,3 +45,12 @@ def check_bitcoin_received(transaction: BitcoinReception):
             return {f"transacción encontrada: {tx}"}
         else:
             return  {"Transacción no encontrada"}
+    
+
+def check_confirmed_tx(data: TxInput):
+    url = f"https://api.blockcypher.com/v1/btc/test3/txs/{data.txid}"
+    response = requests.get(url).json()
+    if "confirmed" in response:
+        return {"message": f"La transacción {data.txid} ha sido confirmada el {response['confirmed']}"}
+    else:
+        return {"message": f"La transacción {data.txid} no ha sido confirmada o no existe"}
