@@ -2,7 +2,7 @@
 from bit import PrivateKeyTestnet
 from fastapi import HTTPException
 
-from models import BitcoinReception, BitcoinTransaction, TxInput
+from models import BitcoinTransaction, TxInput
 from dotenv import dotenv_values
 import requests
 
@@ -35,22 +35,28 @@ def send_bitcoin_to_wallet(transaction: BitcoinTransaction):
             print(f"Error general: {e}")
 
 
-def check_bitcoin_received(transaction: BitcoinReception):
+def check_bitcoin_received(transaction: TxInput):
     transacciones = my_key.get_transactions()
     print("Transacciones:")
     print(transacciones)
     for tx in transacciones:
-        if tx == transaction.tx_hash:
+        if tx == transaction.txid:
             print("Transacción encontrada")
             return {f"transacción encontrada: {tx}"}
-        else:
-            return  {"Transacción no encontrada"}
     
 
 def check_confirmed_tx(data: TxInput):
-    url = f"https://api.blockcypher.com/v1/btc/test3/txs/{data.txid}"
+    base_url = config["URL"]
+    url = f"{base_url}{data.txid}"
     response = requests.get(url).json()
     if "confirmed" in response:
-        return {"message": f"La transacción {data.txid} ha sido confirmada el {response['confirmed']}"}
+        confirmations = response['confirmations']
+        if confirmations == 1:
+            confirmations_message = "1 confirmación"
+        if confirmations == 0:
+            confirmations_message = "0 confirmaciones"
+        if confirmations > 1:
+            confirmations_message = f"{confirmations} confirmaciones"
+        return {"message": f"La transacción {data.txid} ha sido confirmada el {response['confirmed']} y tiene {confirmations_message}"}
     else:
         return {"message": f"La transacción {data.txid} no ha sido confirmada o no existe"}

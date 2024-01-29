@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 import uvicorn
-from models import BitcoinReception, BitcoinTransaction, TxInput
+from models import BitcoinTransaction, TxInput
 
 from transaction import check_bitcoin_received, check_confirmed_tx, send_bitcoin_to_wallet
 
@@ -21,7 +21,7 @@ def send_bitcoin(transaction: BitcoinTransaction):
         return {"error": f"Error desconocido: {str(e)}"}
 
 @app.post("/received-bitcoin")
-def received_bitcoin(transaction: BitcoinReception):
+def received_bitcoin(transaction: TxInput):
     try:
         response = check_bitcoin_received(transaction)
         return response

@@ -5,10 +5,5 @@ class BitcoinTransaction(BaseModel):
     amount: float
     transaction_id: str
 
-class BitcoinReception(BaseModel):
-    tx_hash: str
-    amount: float
-    transaction_id: str
-
 class TxInput(BaseModel):
     txid: str
