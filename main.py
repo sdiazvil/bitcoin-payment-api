@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException
 import uvicorn
-from models import BitcoinReception, BitcoinTransaction, TxInput
+from models import BitcoinTransaction, TxInput
 
-from transaction import check_bitcoin_tx, check_confirmed_tx, send_bitcoin_to_wallet
+from transaction import check_bitcoin_received, check_confirmed_tx, send_bitcoin_to_wallet
 
 app = FastAPI(
     title="Bitcoin transaction microservice",
@@ -16,24 +16,20 @@ def send_bitcoin(transaction: BitcoinTransaction):
         response = send_bitcoin_to_wallet(transaction)
         return response
     except HTTPException as e:
-        # Manejar la excepción HTTPException
         return {"error": f"Error: {e.status_code}, {e.detail}"}
     except Exception as e:
-        # Manejar otras excepciones
         return {"error": f"Error desconocido: {str(e)}"}
 
 @app.post("/received-bitcoin")
-def received_bitcoin(transaction: BitcoinReception):
+def received_bitcoin(transaction: TxInput):
     try:
-        response = check_bitcoin_tx(transaction)
+        response = check_bitcoin_received(transaction)
         return response
     except HTTPException as e:
-        # Manejar la excepción HTTPException
         return {"error": f"Error: {e.status_code}, {e.detail}"}
     except Exception as e:
-        # Manejar otras excepciones
         return {"error": f"Error desconocido: {str(e)}"}
-    
+
 @app.post("/check-received-bitcoin")
 def check_received_bitcoin(transaction: TxInput):
     try:
@@ -45,6 +41,6 @@ def check_received_bitcoin(transaction: TxInput):
     except Exception as e:
         # Manejar otras excepciones
         return {"error": f"Error desconocido: {str(e)}"}
-    
+        
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

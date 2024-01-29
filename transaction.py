@@ -2,7 +2,7 @@
 from bit import PrivateKeyTestnet
 from fastapi import HTTPException
 
-from models import BitcoinReception, BitcoinTransaction, TxInput
+from models import BitcoinTransaction, TxInput
 from dotenv import dotenv_values
 import requests
 
@@ -35,24 +35,28 @@ def send_bitcoin_to_wallet(transaction: BitcoinTransaction):
             print(f"Error general: {e}")
 
 
-def check_bitcoin_tx(transaction: BitcoinReception):
+def check_bitcoin_received(transaction: TxInput):
     transacciones = my_key.get_transactions()
     print("Transacciones:")
     print(transacciones)
     for tx in transacciones:
-        if tx == transaction.tx_hash:
+        if tx == transaction.txid:
             print("Transacción encontrada")
             return {f"transacción encontrada: {tx}"}
-        
+    
+
 def check_confirmed_tx(data: TxInput):
-    # Construir la URL de la API de BlockCypher para consultar el estado de la transacción
-    url = f"https://api.blockcypher.com/v1/btc/test3/txs/{data.txid}"
-    # Hacer una petición GET a la URL y obtener la respuesta en formato JSON
+    base_url = config["URL"]
+    url = f"{base_url}{data.txid}"
     response = requests.get(url).json()
-    # Verificar si la respuesta contiene el campo "confirmed"
     if "confirmed" in response:
-        # Devolver un mensaje indicando que la transacción ha sido confirmada y la fecha de confirmación
-        return {"message": f"La transacción {data.txid} ha sido confirmada el {response['confirmed']}"}
+        confirmations = response['confirmations']
+        if confirmations == 1:
+            confirmations_message = "1 confirmación"
+        if confirmations == 0:
+            confirmations_message = "0 confirmaciones"
+        if confirmations > 1:
+            confirmations_message = f"{confirmations} confirmaciones"
+        return {"message": f"La transacción {data.txid} ha sido confirmada el {response['confirmed']} y tiene {confirmations_message}"}
     else:
-        # Devolver un mensaje indicando que la transacción no ha sido confirmada o no existe
         return {"message": f"La transacción {data.txid} no ha sido confirmada o no existe"}
